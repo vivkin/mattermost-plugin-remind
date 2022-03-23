@@ -416,39 +416,7 @@ func (p *Plugin) normalizeTime(text string, user *model.User) (string, error) {
 		return dateTimeSplit[1], nil
 	} else if match, _ := regexp.MatchString("(1[012]|[1-9]):[0-5][0-9]", t); match { // 12:30
 
-		nowkit := time.Now().In(location).Format(time.Kitchen)
-		ampm := string(nowkit[len(nowkit)-2:])
-		timeUnitSplit := strings.Split(t, ":")
-		hr, _ := strconv.Atoi(timeUnitSplit[0])
-
-		if hr > 11 {
-			ampm = strings.ToUpper(T("pm"))
-		}
-		if hr > 12 {
-			hr -= 12
-			timeUnitSplit[0] = strconv.Itoa(hr)
-		}
-
-		t = timeUnitSplit[0] + ":" + timeUnitSplit[1] + ampm
-
-		test, tErr := time.ParseInLocation(time.Kitchen, t, location)
-		if tErr != nil {
-			return "", tErr
-		}
-
-		dateTimeSplit := p.regSplit(p.chooseClosest(user, &test, false).Format(time.RFC3339), "T|Z")
-
-		switch len(dateTimeSplit) {
-		case 2:
-			tzSplit := strings.Split(dateTimeSplit[1], "-")
-			return tzSplit[0], nil
-		case 3:
-			break
-		default:
-			return "", errors.New("unrecognized dateTime format")
-		}
-
-		return dateTimeSplit[1], nil
+		return t[:len(t)-3] + ":" + t[len(t)-2:] + ":00", nil
 
 	} else if match, _ := regexp.MatchString("(1[012]|[1-9])(\\s)?(?i)(am|pm)", t); match { // 5PM, 7 am
 
